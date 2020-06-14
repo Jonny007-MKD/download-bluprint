@@ -32,6 +32,7 @@ class TLSAdapter(requests.adapters.HTTPAdapter):
 # A Class in mybluprint
 class Class:
     def __init__(self, a):
+        """ Create a new Class object from the <a> tag on the website """
         self.title = a.text
         self.url = "https://shop.mybluprint.com" + a.attrs['href']
         self.photo = "https:" + a.parent.parent.parent.find('img').attrs['src']
@@ -39,8 +40,10 @@ class Class:
         if self.author.startswith("with "): self.author = self.author[len("with "):]
         self.error = None
 
+# An Episode of a Class
 class Episode:
     def __init__(self, div):
+        """ Create a new Episode object from the <div> tag on the website """
         self.id = div.attrs["data-ajax-url"].split("/")[-1]
         self.title = div.attrs["data-title"]
         if self.title.startswith("Episode: "): self.title = self.title[len("Episode: "):]
@@ -51,7 +54,10 @@ class Episode:
 
 
 def scrapeData(session):
-    # Fetch information about all classes from the library
+    """
+    Fetch information about all classes from the library on mybluprint.com
+    Return a list of Class objects
+    """
     classes = []
     offset = 0
     while True:
@@ -98,6 +104,7 @@ def scrapeData(session):
     return classes
 
 def loadCache():
+    """ Load the list of Classes from a cache file to allow continuing the downloading """
     if not os.path.isfile("classes.cache"): return None
     with open("classes.cache", "rb") as cache:
         try:
@@ -108,16 +115,22 @@ def loadCache():
         except:
             return None
 
+# List of Classes with timestamp
 class CachedData:
     def __init__(self, classes):
         self.data = classes
         self.date = datetime.now()
 def writeCache(classes):
+    """ Write the Class list to the cache file for later use """
     with open("classes.cache", "wb") as cache:
         pickle.dump(CachedData(classes), cache)
     return
 
-def makeValidPath(path):
+def makeValidFilename(path):
+    """
+    Make the specified path valid on the current platform, i.e. remove all invalid characters
+    Note: As it removes '/' only file/folder names are supported, no complete paths
+    """
     system = platform.system()
     if system == "Windows":
         return re.sub("[<>:\"/\\|?*]", "", path)
@@ -125,7 +138,13 @@ def makeValidPath(path):
         return re.sub("[/]", "", path)
 
 def downloadClass(session, c):
+    """ Download the Class from mybluprint.com """
+
     def scrapeEpisodes():
+        """
+        Scrape the episode URLs.
+        As the URLs seem to go away after a while we query them only right before downloading.
+        """
         for e in c.episodes:
             if e.url and e.vtt: continue
             try:
@@ -148,6 +167,7 @@ def downloadClass(session, c):
         return
 
     def createDirectory():
+        """ Create the directory for the class, return the path """
         dir = f"{c.title} - {c.author}"
         dir = makeValidPath(dir)
         if not os.path.exists(dir):
@@ -155,6 +175,7 @@ def downloadClass(session, c):
         return dir
 
     def writeClassInfo(dir):
+        """ Write the info.json file in the Class' directory """
         path = os.path.join(dir, "info.json")
         if os.path.exists(path): return
         data = {
@@ -169,6 +190,10 @@ def downloadClass(session, c):
             json.dump(data, f, indent=4)
 
     def downloadFile(url, path):
+        """
+        A generic function to download a file with progress indicator.
+        We download to a temporary file and move at success to not leave behind incomplete files.
+        """
         if os.path.exists(path): return
         tmp = "downloading.tmp"
         with session.get(url, stream=True) as r:
@@ -191,20 +216,24 @@ def downloadClass(session, c):
         return
 
     def downloadImage(dir):
+        """ Download the image of the Class as Folder.jpg """
         print(f"  Downloading image")
         path = os.path.join(dir, "Folder.jpg")
         downloadFile(c.photo, path)
         return
 
     def downloadEpisode(i, classDir, e):
-        print(f"  Downloading episode {i}: {e.title}")
+        """ Download the i-th Episode """
+
         def createDirectory():
+            """ Create the directory for the episode """
             dir = os.path.join(classDir, makeValidPath(f"{i} {e.title}"))
             if not os.path.exists(dir):
                 os.makedirs(dir)
             return dir
 
         def writeEpisodeInfo(dir):
+            """ Write the info.json file in the Episode's folder """
             path = os.path.join(dir, "info.json")
             if os.path.exists(path): return
             data = {
@@ -219,20 +248,24 @@ def downloadClass(session, c):
                 json.dump(data, f, indent=4)
 
         def downloadVTT(dir):
+            """ Download the VTT file to be able to search for keywords later and directly get the timestamp in the Episode """
             print(f"    Downloading VTT")
             path = os.path.join(dir, makeValidPath(f"{e.title}.vtt"))
             downloadFile(e.vtt, path)
 
         def downloadVideo(dir):
+            """ Download the video file """
             print(f"    Downloading Video")
             path = os.path.join(dir, makeValidPath(f"{e.title}.mp4"))
             downloadFile(e.url, path)
 
+        print(f"  Downloading episode {i}: {e.title}")
         scrapeEpisodes()
         dir = createDirectory()
         writeEpisodeInfo(dir)
         downloadVTT(dir)
         downloadVideo(dir)
+        return
 
     print(f"Downloading class {c.title}")
     dir = createDirectory()
@@ -250,9 +283,11 @@ for k,v in cookies.items(): # Add Cookies to be logged in
 
 
 classes = loadCache()
-if not classes:
+if not classes: # no (valid) cache
     classes = scrapeData(session)
     writeCache(classes)
+
 for c in classes:
     downloadClass(session, c)
     writeCache(classes)
+
