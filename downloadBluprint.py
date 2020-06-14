@@ -1,12 +1,3 @@
-cookies = {
-    "craftsy_countrycode": "DE",
-    "craftsy_curcode":     "EUR",
-    "craftsy_tok":         "abcd123456789abcdefg.andsomemorestuffthatidontknowwhatitmeansitprobablyissomeencodedstufforsomehashofencodedlogingdataseparatedbypointsbutialsodontneedtoknowbecauseisimplysendthisdatatotheserverandammagicallyloggedinblablablablablablablablablabblablablablablbalbalbalbalbalbalbablablablablblablablablablablabla.andthelastpartofthisgiganticstringcookiebla",
-    "craftsy_userId":      "123456",
-    "craftsy_visid":       "54ab32de-10fg-hijk-lmno-pqrstuvwxyz0"
-}
-
-
 import sys
 import requests
 import urllib.parse
@@ -16,6 +7,7 @@ import os
 import ssl
 import re
 import platform
+from cookies import cookies
 from datetime import datetime
 from urllib3 import poolmanager
 try: 
@@ -141,7 +133,7 @@ def downloadClass(session, c):
                 print(f"  Fetching location of episode {e.title}: {url}")
                 request = session.get(url)
                 if request.status_code != 200:
-                    print(f"!!! Downloading the episode info failed")
+                    print(f"!!! Downloading the episode info failed: {request.status_code}")
                     e.error = f"Downloading episode info failed: {request.status_code}"
                     continue
                 data = json.loads(request.text)

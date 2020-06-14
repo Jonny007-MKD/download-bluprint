@@ -14,7 +14,7 @@ I didn't create an executable yet, so it's not as easy to use as I want it to be
 
   1. [Download python3](https://www.python.org/downloads/) and install it
   2. Save downloadBluprint.py to the folder where the classes shall be downloaded to
-  3. Put your cookies from mybluprint.com into downloadBluprint.py
+  3. Put your cookies from mybluprint.com into cookies.py
   4. Run `python downloadBluprint.py`
   
 ## What the heck are cookies?
@@ -27,7 +27,7 @@ Step 3 probably is the most difficult one. As I didn't implement a login procedu
   3. Go to the Storage tab and open the Cookies section
      
      ![Screenshot](README-Cookies-Firefox-1.jpg)
-  4. Copy the values from the table to the first lines in the script with the corresponding name
+  4. Copy the values from the table to the lines with the corresponding name in cookies.py
 
 ### Chrome
 
