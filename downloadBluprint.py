@@ -39,6 +39,7 @@ class Class:
         self.author = a.parent.next_sibling.text
         if self.author.startswith("with "): self.author = self.author[len("with "):]
         self.error = None
+        self.episodes = []
 
 # An Episode of a Class
 class Episode:
