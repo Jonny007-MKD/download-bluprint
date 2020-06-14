@@ -133,9 +133,9 @@ def makeValidFilename(path):
     """
     system = platform.system()
     if system == "Windows":
-        return re.sub("[<>:\"/\\|?*]", "", path)
+        return re.sub("[<>:\"/\\|?*]", "", path).strip()
     else:
-        return re.sub("[/]", "", path)
+        return re.sub("[/]", "", path).strip()
 
 def downloadClass(session, c):
     """ Download the Class from mybluprint.com """
