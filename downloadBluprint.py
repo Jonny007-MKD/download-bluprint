@@ -9,6 +9,7 @@ import pickle
 import os
 import ssl
 import re
+import platform
 from datetime import datetime
 from urllib3 import poolmanager
 try: 
@@ -119,7 +120,11 @@ def writeCache(classes):
     return
 
 def makeValidPath(path):
-    return re.sub("[<>:\"/\\|?*]", "", path)
+    system = platform.system()
+    if system == "Windows":
+        return re.sub("[<>:\"/\\|?*]", "", path)
+    else:
+        return re.sub("[/]", "", path)
 
 def downloadClass(session, c):
     def scrapeEpisodes():
