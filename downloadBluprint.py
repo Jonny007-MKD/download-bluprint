@@ -40,6 +40,7 @@ class Class:
         if self.author.startswith("with "): self.author = self.author[len("with "):]
         self.error = None
         self.episodes = []
+        self.resources = []
 
 # An Episode of a Class
 class Episode:
@@ -53,6 +54,12 @@ class Episode:
         self.vtt = None
         self.error = None
 
+# A Resource/Material of a Class
+class Resource:
+    def __init__(self, a):
+        self.id = a.attrs["data-material-id"]
+        self.url = a.attrs["href"]
+        self.title = a.text.strip()
 
 def scrapeData(session):
     """
@@ -97,11 +104,13 @@ def scrapeData(session):
 
             divs = html.body.find("div", id="episodes").findAll('div', attrs={"class":"PlaylistItem"})
             c.episodes = [ Episode(div) for div in divs ]
+            divs = html.body.find("div", id="materials").findAll('a', attrs={"class":"FileLink"})
+            c.resources =  [ Resource(div) for div in divs ]
         except Exception as e:
             print(f"!!! Error: {e}")
             c.error = str(e)
             continue
-        print(f"  Found {len(c.episodes)} episodes")
+        print(f"  Found {len(c.episodes)} episodes and {len(c.resources)} resources")
     return classes
 
 def loadCache():
@@ -268,10 +277,19 @@ def downloadClass(session, c):
         downloadVideo(dir)
         return
 
+    def downloadResource(i, classDir, r):
+        """ Download the i-th Resource """
+        print(f"  Downloading resource {i}: {r.title}")
+        ext = os.path.splitext(urllib.parse.urlparse(r.url).path)[1] # extension from url (probably ".pdf")
+        path = os.path.join(dir, makeValidFilename(f"{r.title}{ext}"))
+        downloadFile(r.url, path)
+
     print(f"Downloading class {c.title}")
     dir = createDirectory()
     writeClassInfo(dir)
     downloadImage(dir)
+    for i,r in enumerate(c.resources):
+        downloadResource(i+1, dir, r)
     for i,e in enumerate(c.episodes):
         downloadEpisode(i+1, dir, e)
 
