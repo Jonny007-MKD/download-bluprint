@@ -206,24 +206,33 @@ def downloadClass(session, c):
         """
         if os.path.exists(path): return
         tmp = "downloading.tmp"
-        with session.get(url, stream=True) as r:
-            if not r:
-                print(f"!!!  Error: {r.status_code}")
-                return
-            total_length = int(r.headers.get('content-length'))
-            downloaded_length = 0
-            with open(tmp, "wb") as f:
-                for chunk in r.iter_content(chunk_size=8192):
-                    f.write(chunk)
-                    if total_length > 0:
-                        done = int(50 * downloaded_length / total_length)
-                        sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (50-done)) )   
-                        sys.stdout.flush()
-                        downloaded_length += len(chunk)
-            if total_length:
-                sys.stdout.write("\r%s\r" % (' ' * 52))
-            os.rename(tmp, path)
-        return
+        for repeat in range(3):
+            try:
+                with session.get(url, stream=True, timeout=10) as r:
+                    if not r:
+                        print(f"!!!  Error: {str(r)}")
+                        return
+                    total_length = int(r.headers.get('content-length')) if r.headers.get('content-length') else 0
+                    downloaded_length = 0
+                    with open(tmp, "wb") as f:
+                        for chunk in r.iter_content(chunk_size=8192):
+                            f.write(chunk)
+                            if total_length > 0:
+                                done = int(50 * downloaded_length / total_length)
+                                sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (50-done)) )
+                                sys.stdout.flush()
+                                downloaded_length += len(chunk)
+                    if total_length:
+                        sys.stdout.write("\r%s\r" % (' ' * 52))
+                    os.rename(tmp, path)
+                    return
+            except requests.exceptions.Timeout:
+                print(f"!!!  Timeout")
+            except requests.exceptions.ConnectionError as e:
+                print(f"!!!  Connection error: {e}")
+            except requests.exceptions.HTTPError as e:
+                print(f"!!!  HTTP error: {e}")
+        print(f"!!!  Too many errors, not trying again")
 
     def downloadImage(dir):
         """ Download the image of the Class as Folder.jpg """
