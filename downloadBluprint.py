@@ -170,7 +170,7 @@ def downloadClass(session, c):
     def createDirectory():
         """ Create the directory for the class, return the path """
         dir = f"{c.title} - {c.author}"
-        dir = makeValidPath(dir)
+        dir = makeValidFilename(dir)
         if not os.path.exists(dir):
             os.makedirs(dir)
         return dir
@@ -228,7 +228,7 @@ def downloadClass(session, c):
 
         def createDirectory():
             """ Create the directory for the episode """
-            dir = os.path.join(classDir, makeValidPath(f"{i} {e.title}"))
+            dir = os.path.join(classDir, makeValidFilename(f"{i} {e.title}"))
             if not os.path.exists(dir):
                 os.makedirs(dir)
             return dir
@@ -251,13 +251,13 @@ def downloadClass(session, c):
         def downloadVTT(dir):
             """ Download the VTT file to be able to search for keywords later and directly get the timestamp in the Episode """
             print(f"    Downloading VTT")
-            path = os.path.join(dir, makeValidPath(f"{e.title}.vtt"))
+            path = os.path.join(dir, makeValidFilename(f"{e.title}.vtt"))
             downloadFile(e.vtt, path)
 
         def downloadVideo(dir):
             """ Download the video file """
             print(f"    Downloading Video")
-            path = os.path.join(dir, makeValidPath(f"{e.title}.mp4"))
+            path = os.path.join(dir, makeValidFilename(f"{e.title}.mp4"))
             downloadFile(e.url, path)
 
         print(f"  Downloading episode {i}: {e.title}")
