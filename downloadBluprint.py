@@ -293,6 +293,15 @@ def downloadClass(session, c):
         path = os.path.join(dir, makeValidFilename(f"{r.title}{ext}"))
         downloadFile(r.url, path)
 
+    def writePlaylist(classDir):
+        path = os.path.join(classDir, "playlist.m3u8")
+        with open(path, "w") as m3u:
+            m3u.write(    f"#EXTM3U\n")
+            for i,e in enumerate(c.episodes):
+                m3u.write(f"#EXTINF:-1,{e.title}\n")
+                path = os.path.join(makeValidFilename(f"{i+1} {e.title}"), makeValidFilename(f"{e.title}.mp4"))
+                m3u.write(f"{path}\n")
+
     print(f"Downloading class {c.title}")
     dir = createDirectory()
     writeClassInfo(dir)
@@ -301,6 +310,7 @@ def downloadClass(session, c):
         downloadResource(i+1, dir, r)
     for i,e in enumerate(c.episodes):
         downloadEpisode(i+1, dir, e)
+    writePlaylist(dir)
 
 
 
