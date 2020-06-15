@@ -8,20 +8,29 @@ While there are some guides on how to download videos e.g.
 
 I wanted some easy to use and free solution.
 
+# Features
+
+  - It downloads almost all classes that are visible in the library of mybluprint.com. For every class a separate folder is created
+  - Every episode is downloaded into a separate folder in the class folder
+  - Additionally, a VTT file is downloaded. This file sometimes contains the subtitles of the video and can thus be used to search for keywords
+  - All Resources (Material) is downloaded from mybluprint.com into the class folder, too.
+  - To make finding a specific class more easy the cover of the class is downloaded as Folder.jpg into the class folder.
+  - Finally a playlist is created to play all episodes in a row.
+
 # How to use it
 
 I didn't create an executable yet, so it's not as easy to use as I want it to be.
 
   1. [Download python3](https://www.python.org/downloads/) and install it
-  2. Save downloadBluprint.py to the folder where the classes shall be downloaded to
+  2. Save downloadBluprint.py and cookies.py to the folder where the classes shall be downloaded to
   3. Put your cookies from mybluprint.com into cookies.py
-  4. Run `python downloadBluprint.py`
+  4. Run `python downloadBluprint.py` (perhaps you need to search the complete path for python :( )
   
 ## What the heck are cookies?
 
 Step 3 probably is the most difficult one. As I didn't implement a login procedure, the script has to use the login data from your browser (e.g. Firefox or Chrome). After you have logged in on mybluprint.com your browser stores some information ("Cookie") to remember the log-in status. By giving the script this information it can access your classes.
 
-### Firefox
+### How to get cookies in Firefox
   1. Log in on mybluprint.com (if you aren't already)
   2. Press F12 (i.e. open the developer console)
   3. Go to the Storage tab and open the Cookies section
@@ -44,4 +53,18 @@ Probably very similar to Firefox, at least [according to this page](https://answ
 ### others
 
 see above. You can also search and ask the internet for help.
+
+# Known issues
+
+## !!! Error: 404
+
+Some classes seem to have been removed and cannot be retreived anmore.
+
+## !!! Error: 'NoneType' object has no attribute 'parent'
+
+The page of this Class looks different than what this script expected. Some pages (e.g. packs) are not yet supported by this script.
+
+## Sometimes the script simply hangs when downloading
+
+I'm not really sure what happens there in the requests library. I have tried to add a workaround using timeouts, hopefully you will never see this issue.
 
